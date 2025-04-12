@@ -34,7 +34,7 @@ services:
     container_name: users-api
     environment:
       - JWT_SECRET=PRFT
-      - SERVER_PORT=8083
+      - SERVER_PORT=8080
       - spring.zipkin.baseUrl=http://zipkin:9411/
     ports:
       - "8083:8080"

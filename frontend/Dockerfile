@@ -1,5 +1,5 @@
 # Use an official Node.js runtime as a parent image
-FROM node:14
+FROM node:14 as build-stage
 
 # Set the working directory in the container
 WORKDIR /app
@@ -16,8 +16,17 @@ COPY . .
 # Build the Vue.js application
 RUN npm run build
 
+# Production stage
+FROM nginx:stable-alpine as production-stage
+
+# Remove default nginx static assets
+RUN rm -rf /usr/share/nginx/html/*
+
+# Copy built Vue app to nginx static directory
+COPY --from=build-stage /app/dist /usr/share/nginx/html
+
 # Expose the port the app runs on
-EXPOSE 8080
+EXPOSE 80
 
 # Start the application
-CMD ["npm", "run", "dev"]
+CMD ["nginx", "-g", "daemon off;"]

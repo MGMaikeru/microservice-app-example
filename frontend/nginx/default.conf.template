@@ -12,16 +12,21 @@ server {
         proxy_pass ${AUTH_API_ADDRESS};
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     }
 
     location /todos {
         proxy_pass ${TODOS_API_ADDRESS};
         proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     }
 
     location /users {
         proxy_pass ${USERS_API_ADDRESS};
         proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     }
 
     location = /favicon.ico {

@@ -76,12 +76,15 @@ services:
       context: ./frontend
     container_name: frontend
     environment:
-      - PORT=8080
+      - PORT=80
       - AUTH_API_ADDRESS=http://auth-api:8000
       - TODOS_API_ADDRESS=http://todos-api:8082
+      - USERS_API_ADDRESS=http://users-api:8080
       - ZIPKIN_URL=http://zipkin:9411
     ports:
-      - "8080:8080"
+      - "80:80"
     depends_on:
       - auth-api
       - todos-api
+      - users-api
+      - zipkin

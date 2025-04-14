@@ -1,32 +1,14 @@
-# Use an official Node.js runtime as a parent image
-FROM node:14 as build-stage
+FROM nginx:alpine
 
-# Set the working directory in the container
-WORKDIR /app
+# Copiar archivos del build (por ejemplo, React/Vite/etc)
+COPY build/ /usr/share/nginx/html/
 
-# Copy package.json and package-lock.json to the working directory
-COPY package*.json ./
+# Copiar el template y script de entrada
+COPY nginx/default.conf.template /etc/nginx/templates/default.conf.template
+COPY entrypoint.sh /entrypoint.sh
 
-# Install dependencies
-RUN npm install
+# Permisos
+RUN chmod +x /entrypoint.sh
 
-# Copy the rest of the application code to the working directory
-COPY . .
-
-# Build the Vue.js application
-RUN npm run build
-
-# Production stage
-FROM nginx:stable-alpine as production-stage
-
-# Remove default nginx static assets
-RUN rm -rf /usr/share/nginx/html/*
-
-# Copy built Vue app to nginx static directory
-COPY --from=build-stage /app/dist /usr/share/nginx/html
-
-# Expose the port the app runs on
-EXPOSE 80
-
-# Start the application
-CMD ["nginx", "-g", "daemon off;"]
+# Entrypoint personalizado
+ENTRYPOINT ["/entrypoint.sh"]

@@ -17,7 +17,7 @@ COPY . .
 ENV PYTHONUNBUFFERED=1
 
 # Expose the port the service will run on (if applicable)
-EXPOSE 6379
+EXPOSE 6380
 
 # Command to run the application
 CMD ["python", "main.py"]

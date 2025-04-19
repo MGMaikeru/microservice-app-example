@@ -1,43 +1,18 @@
-# Etapa de construcción
-FROM node:8.17.0-alpine as build-stage
+FROM node:8.17-alpine as build-stage
 WORKDIR /app
-
-# Copia los archivos necesarios para instalar dependencias
 COPY package*.json ./
-
-# Instala las dependencias necesarias para construir el proyecto
-RUN apk add --no-cache --virtual .gyp python make g++ \
-  && npm install \
-  && apk del .gyp
-
-# Copia el resto de los archivos del proyecto
+RUN npm install
 COPY . .
-
-# Construye el proyecto
 RUN npm run build
 
-# Etapa de producción
-FROM nginx:stable-alpine as production-stage
-
-# Copia el archivo de configuración de Nginx como plantilla
-COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf.template
-
-# Copia los archivos estáticos generados en la etapa de construcción
-COPY --from=build-stage /app/dist /usr/share/nginx/html/
-
-# Copia el script de entrada para manejar las variables de entorno
-COPY ./nginx/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-# Cambia los permisos de los archivos estáticos
-RUN chown -R nginx:nginx /usr/share/nginx/html && \
-  chmod -R 755 /usr/share/nginx/html
-
-# Define el script de entrada como punto de entrada
-ENTRYPOINT ["/entrypoint.sh"]
-
-# Expone el puerto 80
-EXPOSE 80
-
-# Comando por defecto para iniciar Nginx
-CMD ["nginx", "-g", "daemon off;"]
+FROM nginx:alpine
+# Instala envsubst para reemplazar variables en nginx.conf
+RUN apk add --no-cache bash
+COPY nginx.conf /etc/nginx/templates/nginx.conf.template  
+# ¡Nota la extensión .template!
+COPY --from=build-stage /app/dist /usr/share/nginx/html
+COPY config.template.js /usr/share/nginx/html/config.template.js
+CMD ["/bin/sh", "-c", \
+  "envsubst '${AUTH_API_ADDRESS} ${ZIPKIN_URL}' < /usr/share/nginx/html/config.template.js > /usr/share/nginx/html/config.js && \
+   envsubst '${AUTH_API_ADDRESS} ${TODOS_API_ADDRESS}' < /etc/nginx/templates/nginx.conf.template > /etc/nginx/conf.d/default.conf && \
+   nginx -g 'daemon off;'"]

@@ -8,8 +8,8 @@ import decode from "jwt-decode";
  *    and maybe nginx in production (cleaner calls and avoids CORS issues).
  */
 const LOGIN_URL =
-  window.appConfig && window.appConfig.LOGIN_URL + "/api/auth/login"
-    ? window.appConfig.LOGIN_URL
+  window.appConfig && window.appConfig.LOGIN_URL
+    ? window.appConfig.LOGIN_URL + "/login"
     : "https://auth-api.kindsand-4270989f.eastus.azurecontainerapps.io/api/auth/login";
 const ROLE_ADMIN = "ADMIN";
 

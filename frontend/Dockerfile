@@ -1,18 +1,25 @@
-FROM node:8.17-alpine as build-stage
+# 🔨 Etapa 1: Compilación del frontend
+FROM node:8.17.0 AS builder
+
 WORKDIR /app
-COPY package*.json ./
-RUN npm install
 COPY . .
+
+RUN npm install
 RUN npm run build
 
+# 🌐 Etapa 2: Servidor NGINX de producción
 FROM nginx:alpine
-# Instala envsubst para reemplazar variables en nginx.conf
-RUN apk add --no-cache bash
-COPY nginx.conf /etc/nginx/templates/nginx.conf.template  
-# ¡Nota la extensión .template!
-COPY --from=build-stage /app/dist /usr/share/nginx/html
-COPY config.template.js /usr/share/nginx/html/config.template.js
-CMD ["/bin/sh", "-c", \
-  "envsubst '${AUTH_API_ADDRESS} ${ZIPKIN_URL}' < /usr/share/nginx/html/config.template.js > /usr/share/nginx/html/config.js && \
-   envsubst '${AUTH_API_ADDRESS} ${TODOS_API_ADDRESS}' < /etc/nginx/templates/nginx.conf.template > /etc/nginx/conf.d/default.conf && \
-   nginx -g 'daemon off;'"]
+
+# Copia los archivos construidos desde la etapa anterior
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Copia la plantilla de NGINX que usará variables de entorno
+COPY nginx.conf.template /etc/nginx/nginx.conf.template
+
+# Copia el entrypoint que hace el reemplazo de variables
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+EXPOSE 8080
+
+ENTRYPOINT ["/entrypoint.sh"]

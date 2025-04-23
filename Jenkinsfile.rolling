@@ -1,0 +1,159 @@
+pipeline {
+    agent any
+    
+    parameters {
+        choice(
+            name: 'SERVICE',
+            choices: ['all', 'auth-api', 'frontend', 'log-message-processor', 'todos-api', 'users-api'],
+            description: 'Selecciona qué servicio actualizar'
+        )
+    }
+    
+    environment {
+        SERVER_HOST = '20.73.154.112'
+        SERVER_USER = 'useradmin'
+        DEPLOYMENT_DIR = '/opt/microservices'
+        
+        DOCKER_HUB_USERNAME = credentials('DOCKER_HUB_USERNAME') 
+        DOCKER_HUB_TOKEN = credentials('DOCKER_HUB_TOKEN')
+        
+        VM_PASSWORD = credentials('AZURE_VM_PASSWORD')
+    }
+    
+    stages {
+        stage('Validate Connection') {
+            steps {
+                script {
+                    sh '''
+                        if ! command -v sshpass &> /dev/null; then
+                            sudo apt-get update && sudo apt-get install -y sshpass || true
+                        fi
+                    '''
+                    
+                    sh """
+                        sshpass -p '${VM_PASSWORD}' ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_HOST} 'echo Connection successful'
+                    """
+                }
+            }
+        }
+        
+        stage('Login to Docker Hub') {
+            steps {
+                script {
+                    sh """
+                        sshpass -p '${VM_PASSWORD}' ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_HOST} '
+                            echo ${DOCKER_HUB_TOKEN} | docker login -u ${DOCKER_HUB_USERNAME} --password-stdin
+                        '
+                    """
+                }
+            }
+        }
+        
+        stage('Pull Latest Images') {
+            steps {
+                script {
+                    if (params.SERVICE == 'all') {
+                        sh """
+                            sshpass -p '${VM_PASSWORD}' ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_HOST} '
+                                docker pull ${DOCKER_HUB_USERNAME}/auth-api:latest
+                                docker pull ${DOCKER_HUB_USERNAME}/frontend:latest
+                                docker pull ${DOCKER_HUB_USERNAME}/log-message-processor:latest
+                                docker pull ${DOCKER_HUB_USERNAME}/todos-api:latest
+                                docker pull ${DOCKER_HUB_USERNAME}/users-api:latest
+                            '
+                        """
+                    } else {
+                        sh """
+                            sshpass -p '${VM_PASSWORD}' ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_HOST} '
+                                docker pull ${DOCKER_HUB_USERNAME}/${params.SERVICE}:latest
+                            '
+                        """
+                    }
+                }
+            }
+        }
+        
+        stage('Update Service') {
+            steps {
+                script {
+                    // Verificamos si existe el script update-compose.sh, si no, lo creamos
+                    sh """
+                        sshpass -p '${VM_PASSWORD}' ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_HOST} '
+                            cd ${DEPLOYMENT_DIR}
+                            if [ ! -f update-compose.sh ]; then
+                                cat > update-compose.sh << 'EOF'
+#!/bin/bash
+DOCKER_USERNAME="${DOCKER_HUB_USERNAME}"
+cp docker-compose.yml docker-compose.yml.bak
+sed -i "s|build: ./auth-api|image: ${DOCKER_USERNAME}/auth-api:latest|g" docker-compose.yml
+sed -i "s|build: ./frontend|image: ${DOCKER_USERNAME}/frontend:latest|g" docker-compose.yml
+sed -i "s|build: ./log-message-processor|image: ${DOCKER_USERNAME}/log-message-processor:latest|g" docker-compose.yml
+sed -i "s|build: ./todos-api|image: ${DOCKER_USERNAME}/todos-api:latest|g" docker-compose.yml
+sed -i "s|build: ./users-api|image: ${DOCKER_USERNAME}/users-api:latest|g" docker-compose.yml
+EOF
+                                chmod +x update-compose.sh
+                            fi
+                            
+                            # Ejecutar el script para actualizar docker-compose.yml
+                            chmod +x ./update-compose.sh
+                            ./update-compose.sh
+                        '
+                    """
+                    
+                    if (params.SERVICE == 'all') {
+                        sh """
+                            sshpass -p '${VM_PASSWORD}' ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_HOST} '
+                                cd ${DEPLOYMENT_DIR}
+                                docker-compose up -d --no-deps --force-recreate auth-api frontend log-message-processor todos-api users-api
+                            '
+                        """
+                    } else {
+                        sh """
+                            sshpass -p '${VM_PASSWORD}' ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_HOST} '
+                                cd ${DEPLOYMENT_DIR}
+                                docker-compose up -d --no-deps --force-recreate ${params.SERVICE}
+                            '
+                        """
+                    }
+                }
+            }
+        }
+        
+        stage('Verify Service Health') {
+            steps {
+                script {
+                    def serviceToCheck = params.SERVICE
+                    if (serviceToCheck == 'all') {
+                        serviceToCheck = 'frontend'
+                    }
+                    
+                    sh """
+                        sshpass -p '${VM_PASSWORD}' ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_HOST} '
+                            cd ${DEPLOYMENT_DIR}
+                            sleep 15
+                            
+                            # Verificar estado del contenedor
+                            SERVICE_STATUS=\$(docker-compose ps ${serviceToCheck} | grep Up)
+                            if [ -z "\$SERVICE_STATUS" ]; then
+                                echo "El servicio ${serviceToCheck} no se inició correctamente"
+                                docker-compose logs ${serviceToCheck}
+                                exit 1
+                            else
+                                echo "El servicio ${serviceToCheck} está funcionando correctamente"
+                            fi
+                        '
+                    """
+                }
+            }
+        }
+    }
+    
+    post {
+        success {
+            echo "Actualización de servicio completada con éxito: ${params.SERVICE}"
+        }
+        failure {
+            echo "Actualización de servicio falló: ${params.SERVICE}"
+        }
+    }
+}

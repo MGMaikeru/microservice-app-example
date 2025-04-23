@@ -64,7 +64,11 @@ export default {
 }
 
 .btn-logout {
-  background-color: #c0392b !important; /* Rojo más oscuro para Logout */
+  background-color: rgb(
+    160,
+    29,
+    15
+  ) !important; /* Rojo más oscuro para Logout */
   color: white !important;
   border: none;
 }

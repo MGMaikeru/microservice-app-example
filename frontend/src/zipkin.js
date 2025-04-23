@@ -11,7 +11,11 @@ const ZIPKIN_URL = window.location.protocol + '//' + window.location.host + '/zi
 * Tracing plugin that uses Zipkin. Initiates new traces with outgoing requests
 * and injects appropriate headers.
 */
+* Tracing plugin that uses Zipkin. Initiates new traces with outgoing requests
+* and injects appropriate headers.
+*/
 export default {
+
 
   /**
    * Install the Auth class.
@@ -25,6 +29,8 @@ export default {
    */
   install (Vue, options) {
     const serviceName = 'frontend'
+  install (Vue, options) {
+    const serviceName = 'frontend'
     const tracer = new Tracer({
       ctxImpl: new ExplicitContext(),
       recorder: new BatchRecorder({
@@ -32,10 +38,18 @@ export default {
           endpoint: ZIPKIN_URL,
           jsonEncoder: jsonEncoder.JSON_V2
         })
+          jsonEncoder: jsonEncoder.JSON_V2
+        })
       }),
       localServiceName: serviceName
     })
+      localServiceName: serviceName
+    })
 
+    const interceptor = zipkinInterceptor({tracer, serviceName})
+    Vue.http.interceptors.push(interceptor)
+  }
+}
     const interceptor = zipkinInterceptor({tracer, serviceName})
     Vue.http.interceptors.push(interceptor)
   }

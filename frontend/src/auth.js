@@ -2,6 +2,10 @@ import Vue from 'vue'
 import router from './router'
 import store from './store'
 import decode from 'jwt-decode'
+import Vue from 'vue'
+import router from './router'
+import store from './store'
+import decode from 'jwt-decode'
 
 /**
  * @var{string} LOGIN_URL The endpoint for logging in. This endpoint should be proxied by Webpack dev server
@@ -17,7 +21,14 @@ const ROLE_ADMIN = 'ADMIN'
 *
 * Handles login and token authentication using OAuth2.
 */
+* Auth Plugin
+*
+* (see https://vuejs.org/v2/guide/plugins.html for more info on Vue.js plugins)
+*
+* Handles login and token authentication using OAuth2.
+*/
 export default {
+
 
   /**
    * Install the Auth class.
@@ -30,17 +41,24 @@ export default {
    * @return {void}
    */
   install (Vue, options) {
+  install (Vue, options) {
     Vue.http.interceptors.push((request, next) => {
+      const token = store.state.auth.accessToken
+      const hasAuthHeader = request.headers.has('Authorization')
       const token = store.state.auth.accessToken
       const hasAuthHeader = request.headers.has('Authorization')
 
       if (token && !hasAuthHeader) {
         this.setAuthHeader(request)
+        this.setAuthHeader(request)
       }
 
       next()
     })
+      next()
+    })
 
+    Vue.prototype.$auth = Vue.auth = this
     Vue.prototype.$auth = Vue.auth = this
   },
 
@@ -56,18 +74,29 @@ export default {
       username: creds.username,
       password: creds.password
     }
+  login (creds, redirect) {
+    const params = {
+      username: creds.username,
+      password: creds.password
+    }
 
     return Vue.http.post(LOGIN_URL, params)
+    return Vue.http.post(LOGIN_URL, params)
       .then((response) => {
+        this._storeToken(response)
         this._storeToken(response)
 
         if (redirect) {
           router.push({ name: redirect })
+          router.push({ name: redirect })
         }
 
         return response
+        return response
       })
       .catch((errorResponse) => {
+        return errorResponse
+      })
         return errorResponse
       })
   },
@@ -83,6 +112,9 @@ export default {
   logout () {
     store.commit('CLEAR_ALL_DATA')
     router.push({ name: 'login' })
+  logout () {
+    store.commit('CLEAR_ALL_DATA')
+    router.push({ name: 'login' })
   },
 
   /**
@@ -93,13 +125,21 @@ export default {
    */
   setAuthHeader (request) {
     request.headers.set('Authorization', 'Bearer ' + store.state.auth.accessToken)
+  setAuthHeader (request) {
+    request.headers.set('Authorization', 'Bearer ' + store.state.auth.accessToken)
   },
 
   isAdmin () {
     const user = store.state.user
     return user.role === ROLE_ADMIN
+  isAdmin () {
+    const user = store.state.user
+    return user.role === ROLE_ADMIN
   },
 
+  isLoggedIn () {
+    const auth = store.state.auth
+    return auth.isLoggedIn
   isLoggedIn () {
     const auth = store.state.auth
     return auth.isLoggedIn
@@ -116,12 +156,17 @@ export default {
    */
   _retry (request) {
     this.setAuthHeader(request)
+  _retry (request) {
+    this.setAuthHeader(request)
 
     return Vue.http(request)
       .then((response) => {
         return response
+        return response
       })
       .catch((response) => {
+        return response
+      })
         return response
       })
   },
@@ -141,13 +186,25 @@ export default {
     const auth = store.state.auth
     auth.isLoggedIn = true
     auth.accessToken = response.body.accessToken
+  _storeToken (response) {
+    const auth = store.state.auth
+    auth.isLoggedIn = true
+    auth.accessToken = response.body.accessToken
 
+    var userData = decode(auth.accessToken)
     var userData = decode(auth.accessToken)
 
     const user = store.state.user
     user.name = userData.name
     user.role = userData.role
+    const user = store.state.user
+    user.name = userData.name
+    user.role = userData.role
 
+    store.commit('UPDATE_AUTH', auth)
+    store.commit('UPDATE_USER', user)
+  }
+}
     store.commit('UPDATE_AUTH', auth)
     store.commit('UPDATE_USER', user)
   }

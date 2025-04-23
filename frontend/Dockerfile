@@ -1,25 +1,23 @@
-# 🔨 Etapa 1: Compilación del frontend
-FROM node:8.17.0 AS builder
+# Use an official Node.js runtime as a parent image
+FROM node:14
 
+# Set the working directory in the container
 WORKDIR /app
+
+# Copy package.json and package-lock.json to the working directory
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy the rest of the application code to the working directory
 COPY . .
 
-RUN npm install
+# Build the Vue.js application
 RUN npm run build
 
-# 🌐 Etapa 2: Servidor NGINX de producción
-FROM nginx:alpine
-
-# Copia los archivos construidos desde la etapa anterior
-COPY --from=builder /app/dist /usr/share/nginx/html
-
-# Copia la plantilla de NGINX que usará variables de entorno
-COPY nginx.conf.template /etc/nginx/nginx.conf.template
-
-# Copia el entrypoint que hace el reemplazo de variables
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
+# Expose the port the app runs on
 EXPOSE 8080
 
-ENTRYPOINT ["/entrypoint.sh"]
+# Start the application
+CMD ["npm", "run", "dev"]

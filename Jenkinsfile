@@ -95,13 +95,12 @@ pipeline {
                             if [ ! -f update-compose.sh ]; then
                                 cat > update-compose.sh << 'EOF'
 #!/bin/bash
-DOCKER_USERNAME="${DOCKER_HUB_USR}"
 cp docker-compose.yml docker-compose.yml.bak
-sed -i "s|build: ./auth-api|image: ${DOCKER_USERNAME}/auth-api:latest|g" docker-compose.yml
-sed -i "s|build: ./frontend|image: ${DOCKER_USERNAME}/frontend:latest|g" docker-compose.yml
-sed -i "s|build: ./log-message-processor|image: ${DOCKER_USERNAME}/log-message-processor:latest|g" docker-compose.yml
-sed -i "s|build: ./todos-api|image: ${DOCKER_USERNAME}/todos-api:latest|g" docker-compose.yml
-sed -i "s|build: ./users-api|image: ${DOCKER_USERNAME}/users-api:latest|g" docker-compose.yml
+sed -i "s|build: ./auth-api|image: ${DOCKER_HUB_USR}/auth-api:latest|g" docker-compose.yml
+sed -i "s|build: ./frontend|image: ${DOCKER_HUB_USR}/frontend:latest|g" docker-compose.yml
+sed -i "s|build: ./log-message-processor|image: ${DOCKER_HUB_USR}/log-message-processor:latest|g" docker-compose.yml
+sed -i "s|build: ./todos-api|image: ${DOCKER_HUB_USR}/todos-api:latest|g" docker-compose.yml
+sed -i "s|build: ./users-api|image: ${DOCKER_HUB_USR}/users-api:latest|g" docker-compose.yml
 EOF
                                 chmod +x update-compose.sh
                             fi

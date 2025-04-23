@@ -2,12 +2,12 @@
     <div>
         <app-nav></app-nav>
         <div class='container'>
-            <spinner v-show='loggingIn' message='Logging in...'></spinner>
+            <spinner v-show='loggingIn' message='espere...'></spinner>
             <form class='form-horizontal' role='form' v-on:submit.prevent='doLogin'>
                 <div class='row'>
                     <div class='col-md-3'></div>
                     <div class='col-md-6'>
-                        <h2>Please Login</h2>
+                        <h2>Please Loginnnnn</h2>
                         <hr>
                     </div>
                 </div>

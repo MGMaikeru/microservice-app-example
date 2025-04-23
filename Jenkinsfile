@@ -8,8 +8,7 @@ pipeline {
         DEPLOYMENT_DIR = '/opt/microservices'  // Directorio donde Ansible desplegó los archivos
         
         // Docker Hub credentials
-        DOCKER_HUB_USERNAME = credentials('DOCKER_HUB_USERNAME') 
-        DOCKER_HUB_TOKEN = credentials('DOCKER_HUB_TOKEN')
+        DOCKER_HUB = credentials('DOCKER_HUB_CREDENTIALS')
         
         // VM password
         VM_PASSWORD = credentials('AZURE_VM_PASSWORD')
@@ -62,7 +61,7 @@ pipeline {
                 script {
                     sh """
                         sshpass -p '${VM_PASSWORD}' ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_HOST} '
-                            echo ${DOCKER_HUB_TOKEN} | docker login -u ${DOCKER_HUB_USERNAME} --password-stdin
+                            echo ${DOCKER_HUB_PSW} | docker login -u ${DOCKER_HUB_USR} --password-stdin
                         '
                     """
                 }
@@ -75,11 +74,11 @@ pipeline {
                     sh """
                         sshpass -p '${VM_PASSWORD}' ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_HOST} '
                             # Pull the latest images from Docker Hub
-                            docker pull ${DOCKER_HUB_USERNAME}/auth-api:latest
-                            docker pull ${DOCKER_HUB_USERNAME}/frontend:latest
-                            docker pull ${DOCKER_HUB_USERNAME}/log-message-processor:latest
-                            docker pull ${DOCKER_HUB_USERNAME}/todos-api:latest
-                            docker pull ${DOCKER_HUB_USERNAME}/users-api:latest
+                            docker pull ${DOCKER_HUB_USR}/auth-api:latest
+                            docker pull ${DOCKER_HUB_USR}/frontend:latest
+                            docker pull ${DOCKER_HUB_USR}/log-message-processor:latest
+                            docker pull ${DOCKER_HUB_USR}/todos-api:latest
+                            docker pull ${DOCKER_HUB_USR}/users-api:latest
                         '
                     """
                 }
@@ -96,7 +95,7 @@ pipeline {
                             if [ ! -f update-compose.sh ]; then
                                 cat > update-compose.sh << 'EOF'
 #!/bin/bash
-DOCKER_USERNAME="${DOCKER_HUB_USERNAME}"
+DOCKER_USERNAME="${DOCKER_HUB_USR}"
 cp docker-compose.yml docker-compose.yml.bak
 sed -i "s|build: ./auth-api|image: ${DOCKER_USERNAME}/auth-api:latest|g" docker-compose.yml
 sed -i "s|build: ./frontend|image: ${DOCKER_USERNAME}/frontend:latest|g" docker-compose.yml

@@ -102,8 +102,9 @@ sed -i "s|build: ./log-message-processor|image: ${DOCKER_HUB_USR}/log-message-pr
 sed -i "s|build: ./todos-api|image: ${DOCKER_HUB_USR}/todos-api:latest|g" docker-compose.yml
 sed -i "s|build: ./users-api|image: ${DOCKER_HUB_USR}/users-api:latest|g" docker-compose.yml
 EOF
-                                chmod +x update-compose.sh
-                            fi
+                        fi
+
+                            chmod +x update-compose.sh
                             
                             # Ejecutar el script para actualizar docker-compose.yml
                             chmod +x ./update-compose.sh

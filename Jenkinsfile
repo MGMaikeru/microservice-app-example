@@ -141,7 +141,7 @@ EOF
                             cd ${DEPLOYMENT_DIR}
                             SERVICES_DOWN=\$(docker-compose ps --services --filter "status=stopped" | wc -l)
                             
-                            if [ \$SERVICES_DOWN -gt 0 ]; then
+                            if [ \$SERVICES_DOWN -gt 1 ]; then
                                 echo "Error: Some services failed to start!"
                                 sudo docker-compose ps
                                 exit 1

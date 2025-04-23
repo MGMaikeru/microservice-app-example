@@ -104,11 +104,10 @@ sed -i "s|build: ./users-api|image: ${DOCKER_HUB_USR}/users-api:latest|g" docker
 EOF
                         fi
 
-                            chmod +x update-compose.sh
                             
                             # Ejecutar el script para actualizar docker-compose.yml
-                            chmod +x ./update-compose.sh
-                            ./update-compose.sh
+                            sudo chmod +x ./update-compose.sh
+                            sudo ./update-compose.sh
                         '
                     """
                 }
@@ -123,7 +122,7 @@ EOF
                             cd ${DEPLOYMENT_DIR}
                             
                             # Recrear solo los contenedores necesarios sin perder datos
-                            docker-compose up -d --no-deps --force-recreate auth-api frontend log-message-processor todos-api users-api
+                            sudo docker-compose up -d --no-deps --force-recreate auth-api frontend log-message-processor todos-api users-api
                         '
                     """
                 }
@@ -144,11 +143,11 @@ EOF
                             
                             if [ \$SERVICES_DOWN -gt 0 ]; then
                                 echo "Error: Some services failed to start!"
-                                docker-compose ps
+                                sudo docker-compose ps
                                 exit 1
                             else
                                 echo "All services are running!"
-                                docker-compose ps
+                                sudo docker-compose ps
                             fi
                         '
                     """

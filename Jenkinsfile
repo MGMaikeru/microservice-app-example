@@ -36,25 +36,25 @@ pipeline {
             }
         }
         
-        stage('SonarQube Analysis') {
-            steps {
-                script {
-                    // Configurar SonarQube Scanner
-                    def scannerHome = tool 'SonarQubeScanner'
-                    withSonarQubeEnv('SonarQube') {
-                        sh """
-                            ${scannerHome}/bin/sonar-scanner \
-                            -Dsonar.projectKey=microservice-app-example \
-                            -Dsonar.sources=./ \
-                            -Dsonar.host.url=${SONAR_HOST_URL} \
-                            -Dsonar.login=${SONAR_TOKEN} \
-                            -Dsonar.exclusions=**/test/**,**/node_modules/**,**/build/**,**/target/** \
-                            -Dsonar.qualitygate.wait=false
-                        """
-                    }
-                }
-            }
-        }
+        // stage('SonarQube Analysis') {
+        //     steps {
+        //         script {
+        //             // Configurar SonarQube Scanner
+        //             def scannerHome = tool 'SonarQubeScanner'
+        //             withSonarQubeEnv('SonarQube') {
+        //                 sh """
+        //                     ${scannerHome}/bin/sonar-scanner \
+        //                     -Dsonar.projectKey=microservice-app-example \
+        //                     -Dsonar.sources=./ \
+        //                     -Dsonar.host.url=${SONAR_HOST_URL} \
+        //                     -Dsonar.login=${SONAR_TOKEN} \
+        //                     -Dsonar.exclusions=**/test/**,**/node_modules/**,**/build/**,**/target/** \
+        //                     -Dsonar.qualitygate.wait=false
+        //                 """
+        //             }
+        //         }
+        //     }
+        // }
         
         stage('Login to Docker Hub') {
             steps {

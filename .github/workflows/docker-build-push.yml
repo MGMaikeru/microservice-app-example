@@ -1,0 +1,89 @@
+name: Build and Push Docker Images
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "auth-api/**"
+      - "frontend/**"
+      - "log-message-processor/**"
+      - "todos-api/**"
+      - "users-api/**"
+      - ".github/workflows/docker-build-push.yml"
+  pull_request:
+    types: [closed]
+    branches: [main, master]
+    paths:
+      - "auth-api/**"
+      - "frontend/**"
+      - "log-message-processor/**"
+      - "todos-api/**"
+      - "users-api/**"
+
+jobs:
+  build-and-push:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 # Necesario para detectar cambios
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v35
+        with:
+          files: |
+            auth-api/**
+            frontend/**
+            log-message-processor/**
+            todos-api**
+            users-api/**
+
+      # Procesar auth-api si ha cambiado
+      - name: Build and push auth-api
+        if: contains(steps.changed-files.outputs.all_changed_files, 'auth-api/')
+        run: |
+          echo "Building and pushing auth-api..."
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/auth-api:latest ./auth-api
+          docker push ${{ secrets.DOCKER_USERNAME }}/auth-api:latest
+
+      # Procesar frontend si ha cambiado
+      - name: Build and push frontend
+        if: contains(steps.changed-files.outputs.all_changed_files, 'frontend/')
+        run: |
+          echo "Building and pushing frontend..."
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/frontend:latest ./frontend
+          docker push ${{ secrets.DOCKER_USERNAME }}/frontend:latest
+
+      # Procesar log-message-processor si ha cambiado
+      - name: Build and push log-message-processor
+        if: contains(steps.changed-files.outputs.all_changed_files, 'log-message-processor/')
+        run: |
+          echo "Building and pushing log-message-processor..."
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/log-message-processor:latest ./log-message-processor
+          docker push ${{ secrets.DOCKER_USERNAME }}/log-message-processor:latest
+
+      # Procesar todos-api si ha cambiado
+      - name: Build and push todos-api
+        if: contains(steps.changed-files.outputs.all_changed_files, 'todos-api/')
+        run: |
+          echo "Building and pushing todos-api..."
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/todos-api:latest ./todos-api
+          docker push ${{ secrets.DOCKER_USERNAME }}/todos-api:latest
+
+      # Procesar users-api si ha cambiado
+      - name: Build and push users-api
+        if: contains(steps.changed-files.outputs.all_changed_files, 'users-api/')
+        run: |
+          echo "Building and pushing users-api..."
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/users-api:latest ./users-api
+          docker push ${{ secrets.DOCKER_USERNAME }}/users-api:latest

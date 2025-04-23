@@ -42,29 +42,29 @@ export default {
 
 <style>
 .navbar-custom {
-  background-color: #34495e !important; /* Dark blue background */
+  background-color: #2c3e50 !important; /* Nuevo color de fondo más oscuro */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .navbar-brand {
-  color: #ecf0f1 !important; /* Light text for better contrast */
+  color: #f1c40f !important; /* Amarillo oro para el título */
   font-weight: bold;
 }
 
 .btn-admin {
-  background-color: #3498db !important; /* Blue */
+  background-color: #27ae60 !important; /* Verde para Admin */
   color: white !important;
   border: none;
 }
 
 .btn-login {
-  background-color: #9b59b6 !important; /* Purple */
+  background-color: #e67e22 !important; /* Naranja para Login */
   color: white !important;
   border: none;
 }
 
 .btn-logout {
-  background-color: #e74c3c !important; /* Red */
+  background-color: #c0392b !important; /* Rojo más oscuro para Logout */
   color: white !important;
   border: none;
 }

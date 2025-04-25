@@ -42,7 +42,6 @@ pipeline {
                             -Dsonar.projectKey=microservice-app-example \
                             -Dsonar.sources=./ \
                             -Dsonar.host.url=${SONAR_HOST_URL} \
-                            -Dsonar.login=${SONAR_TOKEN} \
                             -Dsonar.java.binaries=users-api/target/classes \
                             -Dsonar.java.libraries=users-api/target/lib/*.jar \
                             -Dsonar.sourceEncoding=UTF-8 \

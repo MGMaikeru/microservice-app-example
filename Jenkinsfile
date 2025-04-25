@@ -64,7 +64,7 @@ pipeline {
                     '''
                     
                     sh """
-                        sshpass -p 'Password@123' ssh -o StrictHostKeyChecking=no adminuser@20.73.154.112 'echo Connection successful'
+                        sshpass -p 'Password@123' ssh -o StrictHostKeyChecking=no adminuser@52.174.5.92 'echo Connection successful'
                     """
                 }
             }
@@ -75,7 +75,7 @@ pipeline {
             steps {
                 script {
                     sh """
-                        sshpass -p 'Password@123' ssh -o StrictHostKeyChecking=no adminuser@20.73.154.112 '
+                        sshpass -p 'Password@123' ssh -o StrictHostKeyChecking=no adminuser@52.174.5.92 '
                             echo ${DOCKER_HUB_PSW} | docker login -u ${DOCKER_HUB_USR} --password-stdin
                         '
                     """
@@ -87,7 +87,7 @@ pipeline {
             steps {
                 script {
                     sh """
-                        sshpass -p 'Password@123' ssh -o StrictHostKeyChecking=no adminuser@20.73.154.112 '
+                        sshpass -p 'Password@123' ssh -o StrictHostKeyChecking=no adminuser@52.174.5.92 '
                             # Pull the latest images from Docker Hub
                             docker pull ${DOCKER_HUB_USR}/auth-api:latest
                             docker pull ${DOCKER_HUB_USR}/frontend:latest
@@ -105,7 +105,7 @@ pipeline {
                 script {
                     // Verificamos si existe el script update-compose.sh, si no, lo creamos
                     sh """
-                        sshpass -p 'Password@123' ssh -o StrictHostKeyChecking=no adminuser@20.73.154.112 '
+                        sshpass -p 'Password@123' ssh -o StrictHostKeyChecking=no adminuser@52.174.5.92 '
                             cd ${DEPLOYMENT_DIR}
                             if [ ! -f update-compose.sh ]; then
                                 cat > update-compose.sh << 'EOF'
@@ -133,7 +133,7 @@ EOF
             steps {
                 script {
                     sh """
-                        sshpass -p 'Password@123' ssh -o StrictHostKeyChecking=no adminuser@20.73.154.112 '
+                        sshpass -p 'Password@123' ssh -o StrictHostKeyChecking=no adminuser@52.174.5.92 '
                             cd ${DEPLOYMENT_DIR}
                             
                             # Recrear solo los contenedores necesarios sin perder datos
@@ -148,7 +148,7 @@ EOF
             steps {
                 script {
                     sh """
-                        sshpass -p 'Password@123' ssh -o StrictHostKeyChecking=no adminuser@20.73.154.112 '
+                        sshpass -p 'Password@123' ssh -o StrictHostKeyChecking=no adminuser@52.174.5.92 '
                             # Wait for services to be fully up
                             sleep 20
                             

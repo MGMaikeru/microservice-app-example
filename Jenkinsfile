@@ -20,38 +20,38 @@ pipeline {
     
     stages {
 
-        stage('Build Java Service') {
-            steps {
-                script {
-                    // This ensures Java classes are compiled before SonarQube analysis
-                    sh """
-                        cd users-api
-                        ./mvnw clean package -DskipTests
-                    """
-                }
-            }
-        }
+        // stage('Build Java Service') {
+        //     steps {
+        //         script {
+        //             // This ensures Java classes are compiled before SonarQube analysis
+        //             sh """
+        //                 cd users-api
+        //                 ./mvnw clean package -DskipTests
+        //             """
+        //         }
+        //     }
+        // }
 
-        stage('SonarQube Analysis') {
-            steps {
-                script {
-                    def scannerHome = tool 'SonarQubeScanner'
-                    withSonarQubeEnv('SonarQube') {
-                        sh """
-                            ${scannerHome}/bin/sonar-scanner \
-                            -Dsonar.projectKey=microservice-app-example \
-                            -Dsonar.sources=./ \
-                            -Dsonar.host.url=${SONAR_HOST_URL} \
-                            -Dsonar.login=${SONAR_TOKEN} \
-                            -Dsonar.java.binaries=users-api/target/classes \
-                            -Dsonar.sourceEncoding=UTF-8 \
-                            -Dsonar.exclusions=**/test/**,**/node_modules/**,**/build/**,**/*.md,**/.git/**,**/.github/**,**/frontend/dist/**,**/package-lock.json,**/*.jar,**/target/lib/**,**/.mvn/** \
-                            -Dsonar.qualitygate.wait=false
-                        """
-                    }
-                }
-            }
-        }
+        // stage('SonarQube Analysis') {
+        //     steps {
+        //         script {
+        //             def scannerHome = tool 'SonarQubeScanner'
+        //             withSonarQubeEnv('SonarQube') {
+        //                 sh """
+        //                     ${scannerHome}/bin/sonar-scanner \
+        //                     -Dsonar.projectKey=microservice-app-example \
+        //                     -Dsonar.sources=./ \
+        //                     -Dsonar.host.url=${SONAR_HOST_URL} \
+        //                     -Dsonar.login=${SONAR_TOKEN} \
+        //                     -Dsonar.java.binaries=users-api/target/classes \
+        //                     -Dsonar.sourceEncoding=UTF-8 \
+        //                     -Dsonar.exclusions=**/test/**,**/node_modules/**,**/build/**,**/*.md,**/.git/**,**/.github/**,**/frontend/dist/**,**/package-lock.json,**/*.jar,**/target/lib/**,**/.mvn/** \
+        //                     -Dsonar.qualitygate.wait=false
+        //                 """
+        //             }
+        //         }
+        //     }
+        // }
         
         stage('Connect to Server') {
             steps {

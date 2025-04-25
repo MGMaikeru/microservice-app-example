@@ -3,7 +3,7 @@ pipeline {
     
     environment {
         // Server details
-        SERVER_HOST = '20.73.154.112'
+        SERVER_HOST = '52.174.5.92'
         SERVER_USER = 'useradmin'
         DEPLOYMENT_DIR = '/opt/microservices'  // Directorio donde Ansible desplegó los archivos
         

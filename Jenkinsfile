@@ -43,7 +43,6 @@ pipeline {
                             -Dsonar.sources=./ \
                             -Dsonar.host.url=${SONAR_HOST_URL} \
                             -Dsonar.java.binaries=users-api/target/classes \
-                            -Dsonar.java.libraries=users-api/target/lib/*.jar \
                             -Dsonar.sourceEncoding=UTF-8 \
                             -Dsonar.exclusions=**/test/**,**/node_modules/**,**/build/**,**/*.md,**/.git/**,**/.github/**,**/frontend/dist/**,**/package-lock.json,**/*.jar,**/target/lib/**,**/.mvn/** \
                             -Dsonar.qualitygate.wait=false
